@@ -10,11 +10,18 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
     constructor(private readonly prismaService: PrismaService) {}
 
     async create(question: Question) {
-        return this.prismaService.question.create;
+        const data = PrismaQuestionMapper.toPersistence(question);
+        this.prismaService.question.create({ data });
     }
 
-    findBySlug(slug: string): Promise<Question | null> {
-        throw new Error("Method not implemented.");
+    async findBySlug(slug: string) {
+        const question = await this.prismaService.question.findUnique({
+            where: { slug },
+        });
+        if (!question) {
+            return null;
+        }
+        return PrismaQuestionMapper.toDomain(question);
     }
 
     async findById(id: string) {
@@ -29,15 +36,31 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
         return PrismaQuestionMapper.toDomain(question);
     }
 
-    delete(question: Question): Promise<void> {
-        throw new Error("Method not implemented.");
+    async delete(question: Question) {
+        const data = PrismaQuestionMapper.toPersistence(question);
+        await this.prismaService.question.delete({
+            where: { id: data.id },
+        });
     }
 
-    save(question: Question): Promise<void> {
-        throw new Error("Method not implemented.");
+    async save(question: Question) {
+        const data = PrismaQuestionMapper.toPersistence(question);
+        await this.prismaService.question.update({
+            where: { id: question.id.toString() },
+            data,
+        });
     }
 
-    findManyRecent(params: PaginationParams): Promise<Question[]> {
-        throw new Error("Method not implemented.");
+    async findManyRecent({ page }: PaginationParams) {
+        const PAGE_SIZE = 20;
+        const questions = await this.prismaService.question.findMany({
+            orderBy: {
+                createdAt: "desc",
+            },
+            take: PAGE_SIZE,
+            skip: (page - 1) * PAGE_SIZE,
+        });
+
+        return questions.map(PrismaQuestionMapper.toDomain);
     }
 }
