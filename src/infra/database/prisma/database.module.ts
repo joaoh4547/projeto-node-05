@@ -17,6 +17,14 @@ import { PrismaAnswerAttachmentsRepository } from "./repositories/prisma-answer-
         PrismaAnswerCommentsRepository,
         PrismaAnswerAttachmentsRepository,
     ],
-    exports: [PrismaService],
+    exports: [
+        PrismaService,
+        PrismaQuestionsRepository,
+        PrismaQuestionCommentsRepository,
+        PrismaQuestionAttachmentRepository,
+        PrismaAnswersRepository,
+        PrismaAnswerCommentsRepository,
+        PrismaAnswerAttachmentsRepository,
+    ],
 })
 export class DatabaseModule {}
