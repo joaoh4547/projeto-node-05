@@ -6,20 +6,18 @@ import { QuestionBestAnswerChosenEvent } from "../events/question-best-answer-ch
 import { QuestionAttachmentList } from "./question-attachment-list";
 import { Slug } from "./value-objects/slug";
 
-
 export interface QuestionProps {
-  authorId: UniqueEntityId,
-  bestAnswerId?: UniqueEntityId,
-  attachments: QuestionAttachmentList,
-  title: string,
-  content: string,
-  slug: Slug,
-  createdAt: Date,
-  updatedAt?: Date
+    authorId: UniqueEntityId;
+    bestAnswerId?: UniqueEntityId;
+    attachments: QuestionAttachmentList;
+    title: string;
+    content: string;
+    slug: Slug;
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 export class Question extends AggregateRoot<QuestionProps> {
-
     get title() {
         return this.props.title;
     }
@@ -48,18 +46,21 @@ export class Question extends AggregateRoot<QuestionProps> {
     }
 
     set bestAnswerId(bestAnswerId: UniqueEntityId | undefined) {
-
-        if(bestAnswerId === undefined) {
+        if (bestAnswerId === undefined) {
             return;
         }
 
-        if(this.props.bestAnswerId === undefined || !this.props.bestAnswerId.equals(bestAnswerId)) {
-            this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerId));
+        if (
+            this.props.bestAnswerId === undefined ||
+            !this.props.bestAnswerId.equals(bestAnswerId)
+        ) {
+            this.addDomainEvent(
+                new QuestionBestAnswerChosenEvent(this, bestAnswerId),
+            );
         }
 
         this.props.bestAnswerId = bestAnswerId;
         this.touch();
-
     }
 
     get slug() {
@@ -83,7 +84,7 @@ export class Question extends AggregateRoot<QuestionProps> {
         return this.props.updatedAt;
     }
 
-    get isNew(){
+    get isNew() {
         return dayjs().diff(this.props.createdAt, "days") <= 3;
     }
 
@@ -95,15 +96,19 @@ export class Question extends AggregateRoot<QuestionProps> {
         this.props.updatedAt = new Date();
     }
 
-
-    static create(props: Optional<QuestionProps, "createdAt" | "slug" | "attachments">, id?: UniqueEntityId) {
-        const question = new Question({
-            ...props,
-            slug: props.slug ?? Slug.createFromText(props.title),
-            createdAt: props.createdAt?? new Date(),
-            attachments: props.attachments?? new QuestionAttachmentList()
-        }, id);
+    static create(
+        props: Optional<QuestionProps, "createdAt" | "slug" | "attachments">,
+        id?: UniqueEntityId,
+    ) {
+        const question = new Question(
+            {
+                ...props,
+                slug: props.slug ?? Slug.createFromText(props.title),
+                createdAt: props.createdAt ?? new Date(),
+                attachments: props.attachments ?? new QuestionAttachmentList(),
+            },
+            id,
+        );
         return question;
     }
-
 }

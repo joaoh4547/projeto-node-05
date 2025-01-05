@@ -1,4 +1,3 @@
-
 import { Either, left, right } from "./either";
 
 function doSomething(x: boolean): Either<string, number> {

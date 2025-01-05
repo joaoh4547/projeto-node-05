@@ -1,56 +1,55 @@
-import { Body, Controller, Post, UnauthorizedException, UsePipes } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Post,
+    UnauthorizedException,
+    UsePipes,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { compare } from "bcryptjs";
 import { ZodValidationPipe } from "@/infra/http/pipes/zod-validation.pipe";
-import { PrismaService } from "@/infra/prisma/prisma.service";
+import { PrismaService } from "@/infra/database/prisma/prisma.service";
 import { z } from "zod";
-
-
 
 const authenticateBodySchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
 
-type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>
+type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>;
 
 @Controller("/sessions")
 export class AuthenticateController {
-
     constructor(
         private readonly prismaService: PrismaService,
-         private readonly jwt: JwtService
-    ) { }  
-
+        private readonly jwt: JwtService,
+    ) {}
 
     @Post()
-    @UsePipes(new ZodValidationPipe(authenticateBodySchema))  // apply zod validation pipe here.
+    @UsePipes(new ZodValidationPipe(authenticateBodySchema)) // apply zod validation pipe here.
     async handle(@Body() body: AuthenticateBodySchema) {
         const { email, password } = body;
 
         const user = await this.prismaService.user.findUnique({
             where: {
-                email
-            }
+                email,
+            },
         });
-        
-        if(!user){
+
+        if (!user) {
             throw new UnauthorizedException("User credencial do not match");
         }
 
         const isMatchPassword = await compare(password, user.password);
 
-        if(!isMatchPassword){
+        if (!isMatchPassword) {
             throw new UnauthorizedException("User credencial do not match");
         }
-        
 
         const accessToken = this.jwt.sign({ sub: user.id });
 
         return {
-            access_token: accessToken
+            access_token: accessToken,
         };
-
-
     }
 }

@@ -6,15 +6,10 @@ import { DeleteQuestionCommentUseCase } from "./delete-question-comment";
 let questionCommentsRepository: InMemoryQuestionsCommentsRepository;
 let sut: DeleteQuestionCommentUseCase;
 
-
 describe("Delete Question Comment Use Case", () => {
-
     beforeEach(() => {
-
         questionCommentsRepository = new InMemoryQuestionsCommentsRepository();
-        sut = new DeleteQuestionCommentUseCase(
-            questionCommentsRepository
-        );
+        sut = new DeleteQuestionCommentUseCase(questionCommentsRepository);
     });
 
     it("should be able to delete a question comment", async () => {
@@ -23,11 +18,10 @@ describe("Delete Question Comment Use Case", () => {
 
         await sut.handle({
             authorId: "1",
-            questionCommentId: newQuestion.id.toString()
+            questionCommentId: newQuestion.id.toString(),
         });
         expect(questionCommentsRepository.comments).toHaveLength(0);
     });
-
 
     it("should not be able to delete another user question comment", async () => {
         const newQuestion = makeQuestionComment();
@@ -35,13 +29,10 @@ describe("Delete Question Comment Use Case", () => {
 
         const result = await sut.handle({
             authorId: "2",
-            questionCommentId: newQuestion.id.toString()
+            questionCommentId: newQuestion.id.toString(),
         });
 
         expect(result.isLeft()).toBe(true);
         expect(result.value).toBeInstanceOf(NotAllowedError);
     });
-
-  
 });
-

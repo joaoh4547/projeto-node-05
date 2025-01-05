@@ -5,8 +5,7 @@ let notificationRepository: InMemoryNotificationsRepository;
 let sut: SendNotificationUseCase;
 
 describe("Send Notification Use Case", () => {
-
-    beforeEach(() =>{
+    beforeEach(() => {
         notificationRepository = new InMemoryNotificationsRepository();
         sut = new SendNotificationUseCase(notificationRepository);
     });
@@ -15,12 +14,12 @@ describe("Send Notification Use Case", () => {
         const result = await sut.handle({
             recipientId: "1",
             content: "content",
-            title: "title"
+            title: "title",
         });
 
         expect(result.isRight()).toBe(true);
-        expect(notificationRepository.notifications[0]).toEqual(result.value?.notification);
+        expect(notificationRepository.notifications[0]).toEqual(
+            result.value?.notification,
+        );
     });
-
 });
-  

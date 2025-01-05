@@ -5,17 +5,24 @@ import { AnswerCreatedEvent } from "@/domain/forum/enterprise/events/answer-crea
 import { SendNotificationUseCase } from "../use-cases/send-notification";
 
 export class OnAnswerCreated implements EventHandler {
-
-    constructor(private questionsRepository: QuestionsRepository, private sendNotification: SendNotificationUseCase) {
+    constructor(
+        private questionsRepository: QuestionsRepository,
+        private sendNotification: SendNotificationUseCase,
+    ) {
         this.setupSubscriptions();
     }
 
     setupSubscriptions() {
-        DomainEvents.register(this.sendNewAnswerNotification.bind(this), AnswerCreatedEvent.name);
+        DomainEvents.register(
+            this.sendNewAnswerNotification.bind(this),
+            AnswerCreatedEvent.name,
+        );
     }
 
     private async sendNewAnswerNotification({ answer }: AnswerCreatedEvent) {
-        const question = await this.questionsRepository.findById(answer.questionId.toString());
+        const question = await this.questionsRepository.findById(
+            answer.questionId.toString(),
+        );
 
         if (question) {
             await this.sendNotification.handle({
@@ -24,6 +31,5 @@ export class OnAnswerCreated implements EventHandler {
                 content: answer.excerpt,
             });
         }
-
     }
-} 
+}

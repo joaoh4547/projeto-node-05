@@ -8,8 +8,7 @@ let notificationRepository: InMemoryNotificationsRepository;
 let sut: ReadNotificationUseCase;
 
 describe("Read Notification Use Case", () => {
-
-    beforeEach(() =>{
+    beforeEach(() => {
         notificationRepository = new InMemoryNotificationsRepository();
         sut = new ReadNotificationUseCase(notificationRepository);
     });
@@ -18,23 +17,29 @@ describe("Read Notification Use Case", () => {
         const newNotification = makeNotification();
         await notificationRepository.create(newNotification);
 
-        const result = await sut.handle({notificationId: newNotification.id.toString(),recipientId: newNotification.recipientId.toString()});
+        const result = await sut.handle({
+            notificationId: newNotification.id.toString(),
+            recipientId: newNotification.recipientId.toString(),
+        });
 
         expect(result.isRight()).toBe(true);
-        expect(notificationRepository.notifications[0].readAt).toEqual(expect.any(Date));
+        expect(notificationRepository.notifications[0].readAt).toEqual(
+            expect.any(Date),
+        );
     });
 
     it("should to not be able to read a notification from another user", async () => {
         const newNotification = makeNotification({
-            recipientId: new  UniqueEntityId("1")
+            recipientId: new UniqueEntityId("1"),
         });
         await notificationRepository.create(newNotification);
 
-        const result = await sut.handle({notificationId: newNotification.id.toString(),recipientId: new UniqueEntityId("2").toString()});
+        const result = await sut.handle({
+            notificationId: newNotification.id.toString(),
+            recipientId: new UniqueEntityId("2").toString(),
+        });
 
         expect(result.isLeft()).toBe(true);
         expect(result.value).toBeInstanceOf(NotAllowedError);
     });
-
 });
-  

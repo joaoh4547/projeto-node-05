@@ -10,65 +10,76 @@ let sut: EditQuestionUseCase;
 let questionsRepository: InMemoryQuestionsRepository;
 let questionAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
 describe("Edit Question Use Case", () => {
-
     beforeEach(() => {
-        questionAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
-        questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
-        sut = new EditQuestionUseCase(questionsRepository,questionAttachmentsRepository);
+        questionAttachmentsRepository =
+            new InMemoryQuestionAttachmentsRepository();
+        questionsRepository = new InMemoryQuestionsRepository(
+            questionAttachmentsRepository,
+        );
+        sut = new EditQuestionUseCase(
+            questionsRepository,
+            questionAttachmentsRepository,
+        );
     });
 
     it("should to able to edit a question", async () => {
-        const newQuestion = makeQuestion({ authorId: new UniqueEntityId("2") }, new UniqueEntityId("1"));
+        const newQuestion = makeQuestion(
+            { authorId: new UniqueEntityId("2") },
+            new UniqueEntityId("1"),
+        );
         await questionsRepository.create(newQuestion);
 
         questionAttachmentsRepository.attachments.push(
             makeQuestionAttachment({
                 attachmentId: new UniqueEntityId("1"),
-                questionId: newQuestion.id
+                questionId: newQuestion.id,
             }),
             makeQuestionAttachment({
                 attachmentId: new UniqueEntityId("2"),
-                questionId: newQuestion.id
+                questionId: newQuestion.id,
             }),
         );
 
         await sut.handle({
             questionId: newQuestion.id.toString(),
             authorId: "2",
-            title: "New Title", 
+            title: "New Title",
             content: "New Content",
-            attachmentsIds: ["1","3"]
+            attachmentsIds: ["1", "3"],
         });
 
         expect(questionsRepository.questions[0]).toMatchObject({
-            title: "New Title", 
-            content: "New Content"
+            title: "New Title",
+            content: "New Content",
         });
 
-        expect(questionsRepository.questions[0].attachments.currentItems).toHaveLength(2);
-        expect(questionsRepository.questions[0].attachments.currentItems).toEqual([
+        expect(
+            questionsRepository.questions[0].attachments.currentItems,
+        ).toHaveLength(2);
+        expect(
+            questionsRepository.questions[0].attachments.currentItems,
+        ).toEqual([
             expect.objectContaining({ attachmentId: new UniqueEntityId("1") }),
-            expect.objectContaining({ attachmentId: new UniqueEntityId("3") })
+            expect.objectContaining({ attachmentId: new UniqueEntityId("3") }),
         ]);
     });
 
-
     it("should to not be able to edit a question from another user", async () => {
-        const newQuestion = makeQuestion({ authorId: new UniqueEntityId("2") }, new UniqueEntityId("1"));
+        const newQuestion = makeQuestion(
+            { authorId: new UniqueEntityId("2") },
+            new UniqueEntityId("1"),
+        );
         await questionsRepository.create(newQuestion);
-
 
         const result = await sut.handle({
             questionId: newQuestion.id.toString(),
             authorId: "4",
             title: "New Title",
             content: "New Content",
-            attachmentsIds: []
+            attachmentsIds: [],
         });
-       
 
         expect(result.isLeft()).toBe(true);
         expect(result.value).toBeInstanceOf(NotAllowedError);
     });
-
 });

@@ -1,4 +1,3 @@
-
 import { Either, left, right } from "@/core/either";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
 import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
@@ -11,22 +10,32 @@ export interface ChooseQuestionBestAnswerUseCaseInputParams {
     answerId: string;
 }
 
-export type ChooseQuestionBestAnswerUseCaseResult = Either<ResourceNotFoundError | NotAllowedError, {
-    question: Question
-}>
+export type ChooseQuestionBestAnswerUseCaseResult = Either<
+    ResourceNotFoundError | NotAllowedError,
+    {
+        question: Question;
+    }
+>;
 
 export class ChooseQuestionBestAnswerUseCase {
+    constructor(
+        private answersRepository: AnswersRepository,
+        private questionsRepository: QuestionsRepository,
+    ) {}
 
-    constructor(private answersRepository: AnswersRepository, private questionsRepository: QuestionsRepository) { }
-
-    async handle({ authorId, answerId }: ChooseQuestionBestAnswerUseCaseInputParams): Promise<ChooseQuestionBestAnswerUseCaseResult> {
+    async handle({
+        authorId,
+        answerId,
+    }: ChooseQuestionBestAnswerUseCaseInputParams): Promise<ChooseQuestionBestAnswerUseCaseResult> {
         const answer = await this.answersRepository.findById(answerId);
 
         if (!answer) {
             return left(new ResourceNotFoundError());
         }
 
-        const question = await this.questionsRepository.findById(answer.questionId.toString());
+        const question = await this.questionsRepository.findById(
+            answer.questionId.toString(),
+        );
 
         if (!question) {
             return left(new ResourceNotFoundError());
@@ -39,6 +48,6 @@ export class ChooseQuestionBestAnswerUseCase {
         question.bestAnswerId = answer.id;
 
         await this.questionsRepository.save(question);
-        return right({ question }); 
+        return right({ question });
     }
 }

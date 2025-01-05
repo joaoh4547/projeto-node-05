@@ -12,50 +12,52 @@ let questionsRepository: InMemoryQuestionsRepository;
 let answersRepository: InMemoryAnswersRepository;
 let sut: ChooseQuestionBestAnswerUseCase;
 
-
 describe("Choose Question Best Answer Use Case", () => {
-
     beforeEach(() => {
-        questionsRepository = new InMemoryQuestionsRepository(new InMemoryQuestionAttachmentsRepository());
-        answersRepository = new InMemoryAnswersRepository(new InMemoryAnswerAttachmentsRepository());
+        questionsRepository = new InMemoryQuestionsRepository(
+            new InMemoryQuestionAttachmentsRepository(),
+        );
+        answersRepository = new InMemoryAnswersRepository(
+            new InMemoryAnswerAttachmentsRepository(),
+        );
         sut = new ChooseQuestionBestAnswerUseCase(
             answersRepository,
-            questionsRepository
+            questionsRepository,
         );
     });
 
     it("should be able to choose the question best answer", async () => {
         const newQuestion = makeQuestion();
         const newAnswer = makeAnswer({
-            questionId: newQuestion.id
+            questionId: newQuestion.id,
         });
         await questionsRepository.create(newQuestion);
         await answersRepository.create(newAnswer);
 
         await sut.handle({
             answerId: newAnswer.id.toString(),
-            authorId: newQuestion.authorId.toString()
+            authorId: newQuestion.authorId.toString(),
         });
 
-        expect(questionsRepository.questions[0].bestAnswerId).toEqual(newAnswer.id);
+        expect(questionsRepository.questions[0].bestAnswerId).toEqual(
+            newAnswer.id,
+        );
     });
 
     it("should not be able to choose another user question best answer", async () => {
         const newQuestion = makeQuestion({ authorId: new UniqueEntityId("2") });
         const newAnswer = makeAnswer({
-            questionId: newQuestion.id
+            questionId: newQuestion.id,
         });
         await questionsRepository.create(newQuestion);
         await answersRepository.create(newAnswer);
 
-        const result = await  sut.handle({
+        const result = await sut.handle({
             answerId: newAnswer.id.toString(),
-            authorId: "3"
+            authorId: "3",
         });
 
         expect(result.isLeft()).toBe(true);
         expect(result.value).toBeInstanceOf(NotAllowedError);
     });
-
 });
-

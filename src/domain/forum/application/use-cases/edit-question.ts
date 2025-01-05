@@ -1,4 +1,3 @@
-
 import { Either, left, right } from "@/core/either";
 import { UniqueEntityId } from "@/core/entities/value-objects/unique-entity-id";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
@@ -17,18 +16,26 @@ export interface EditQuestionUseCaseInputParams {
     attachmentsIds: string[];
 }
 
-export type EditQuestionUseCaseResult = Either<ResourceNotFoundError | NotAllowedError, {
-    question: Question
-}>;
+export type EditQuestionUseCaseResult = Either<
+    ResourceNotFoundError | NotAllowedError,
+    {
+        question: Question;
+    }
+>;
 
 export class EditQuestionUseCase {
-
     constructor(
         private questionsRepository: QuestionsRepository,
-        private questionAttachmentsRepository: QuestionAttachmentsRepository
-    ) { }
+        private questionAttachmentsRepository: QuestionAttachmentsRepository,
+    ) {}
 
-    async handle({ questionId, authorId, title, content, attachmentsIds }: EditQuestionUseCaseInputParams): Promise<EditQuestionUseCaseResult> {
+    async handle({
+        questionId,
+        authorId,
+        title,
+        content,
+        attachmentsIds,
+    }: EditQuestionUseCaseInputParams): Promise<EditQuestionUseCaseResult> {
         const question = await this.questionsRepository.findById(questionId);
 
         if (!question) {
@@ -39,12 +46,16 @@ export class EditQuestionUseCase {
             return left(new NotAllowedError());
         }
 
-        const currentQuestionAttachments = await this.questionAttachmentsRepository.findManyByQuestionId(questionId);
+        const currentQuestionAttachments =
+            await this.questionAttachmentsRepository.findManyByQuestionId(
+                questionId,
+            );
 
-        const questionAttachmentList = new QuestionAttachmentList(currentQuestionAttachments);
+        const questionAttachmentList = new QuestionAttachmentList(
+            currentQuestionAttachments,
+        );
 
-
-        const questionAttachments = attachmentsIds.map(attachmentsId =>{
+        const questionAttachments = attachmentsIds.map((attachmentsId) => {
             return QuestionAttachment.create({
                 attachmentId: new UniqueEntityId(attachmentsId),
                 questionId: question.id,

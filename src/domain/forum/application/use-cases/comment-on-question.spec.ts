@@ -8,15 +8,15 @@ let questionsRepository: InMemoryQuestionsRepository;
 let questionCommentsRepository: InMemoryQuestionsCommentsRepository;
 let sut: CommentOnQuestionUseCase;
 
-
 describe("Comment on question Use Case", () => {
-
     beforeEach(() => {
-        questionsRepository = new InMemoryQuestionsRepository(new InMemoryQuestionAttachmentsRepository());
+        questionsRepository = new InMemoryQuestionsRepository(
+            new InMemoryQuestionAttachmentsRepository(),
+        );
         questionCommentsRepository = new InMemoryQuestionsCommentsRepository();
         sut = new CommentOnQuestionUseCase(
             questionsRepository,
-            questionCommentsRepository
+            questionCommentsRepository,
         );
     });
 
@@ -27,11 +27,10 @@ describe("Comment on question Use Case", () => {
         await sut.handle({
             questionId: newQuestion.id.toString(),
             authorId: "1",
-            content: "New Comment"
+            content: "New Comment",
         });
-        expect(questionCommentsRepository.comments[0].content).toEqual("New Comment");
+        expect(questionCommentsRepository.comments[0].content).toEqual(
+            "New Comment",
+        );
     });
-
-  
 });
-

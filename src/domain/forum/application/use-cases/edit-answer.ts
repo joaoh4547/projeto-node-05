@@ -1,4 +1,3 @@
-
 import { Either, left, right } from "@/core/either";
 import { UniqueEntityId } from "@/core/entities/value-objects/unique-entity-id";
 import { NotAllowedError } from "@/core/errors/not-allowed-error";
@@ -10,39 +9,49 @@ import { AnswerAttachmentsRepository } from "../repositories/answer-attachments-
 import { AnswersRepository } from "../repositories/answers-repository";
 
 export interface EditAnswerUseCaseInputParams {
-  answerId: string;
-  authorId: string;
-  content: string;
-  attachmentsIds: string[];
+    answerId: string;
+    authorId: string;
+    content: string;
+    attachmentsIds: string[];
 }
 
-export type EditAnswerUseCaseResult = Either<ResourceNotFoundError| NotAllowedError, {
-    answer: Answer
-}>;
+export type EditAnswerUseCaseResult = Either<
+    ResourceNotFoundError | NotAllowedError,
+    {
+        answer: Answer;
+    }
+>;
 
 export class EditAnswerUseCase {
-
     constructor(
-         private answersRepository: AnswersRepository,
-         private answerAttachmentsRepository: AnswerAttachmentsRepository) { }
+        private answersRepository: AnswersRepository,
+        private answerAttachmentsRepository: AnswerAttachmentsRepository,
+    ) {}
 
-    async handle({ answerId,authorId,content, attachmentsIds }: EditAnswerUseCaseInputParams): Promise<EditAnswerUseCaseResult> {
+    async handle({
+        answerId,
+        authorId,
+        content,
+        attachmentsIds,
+    }: EditAnswerUseCaseInputParams): Promise<EditAnswerUseCaseResult> {
         const answer = await this.answersRepository.findById(answerId);
 
-        if(!answer) {
+        if (!answer) {
             return left(new ResourceNotFoundError());
         }
 
-        if(authorId !== answer.authorId.toString()) {
+        if (authorId !== answer.authorId.toString()) {
             return left(new NotAllowedError());
         }
 
-        const currentAnswerAttachments = await this.answerAttachmentsRepository.findManyByAnswerId(answerId);
+        const currentAnswerAttachments =
+            await this.answerAttachmentsRepository.findManyByAnswerId(answerId);
 
-        const answerAttachmentList = new AnswerAttachmentList(currentAnswerAttachments);
+        const answerAttachmentList = new AnswerAttachmentList(
+            currentAnswerAttachments,
+        );
 
-
-        const answerAttachments = attachmentsIds.map(attachmentsId =>{
+        const answerAttachments = attachmentsIds.map((attachmentsId) => {
             return AnswerAttachment.create({
                 attachmentId: new UniqueEntityId(attachmentsId),
                 answerId: answer.id,
@@ -50,7 +59,6 @@ export class EditAnswerUseCase {
         });
 
         answerAttachmentList.update(answerAttachments);
-
 
         answer.content = content;
         answer.attachments = answerAttachmentList;

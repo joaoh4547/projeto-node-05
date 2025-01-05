@@ -8,7 +8,11 @@ import { InMemoryQuestionAttachmentsRepository } from "test/repositories/in-memo
 import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questions-repository";
 import { waitFor } from "test/utils/wait-for";
 import { NotificationsRepository } from "../repositories/notifications-repository";
-import { SendNotificationUseCase, SendNotificationUseCaseInputParams, SendNotificationUseCaseResult } from "../use-cases/send-notification";
+import {
+    SendNotificationUseCase,
+    SendNotificationUseCaseInputParams,
+    SendNotificationUseCaseResult,
+} from "../use-cases/send-notification";
 import { OnQuestionBestAnswerChosen } from "./on-question-best-answer-chosen";
 import { MockInstance } from "vitest";
 
@@ -17,22 +21,32 @@ let answersRepository: InMemoryAnswersRepository;
 let sendNotification: SendNotificationUseCase;
 let notificationsRepository: NotificationsRepository;
 
-let sendNotificationSpy: MockInstance<({ recipientId, content, title }: SendNotificationUseCaseInputParams) => Promise<SendNotificationUseCaseResult>> ;
+let sendNotificationSpy: MockInstance<
+    ({
+        recipientId,
+        content,
+        title,
+    }: SendNotificationUseCaseInputParams) => Promise<SendNotificationUseCaseResult>
+>;
 
 describe("On Question Best Answer Chosen", () => {
     beforeEach(() => {
-        questionsRepository = new InMemoryQuestionsRepository(new InMemoryQuestionAttachmentsRepository());
-        answersRepository = new InMemoryAnswersRepository(new InMemoryAnswerAttachmentsRepository());
+        questionsRepository = new InMemoryQuestionsRepository(
+            new InMemoryQuestionAttachmentsRepository(),
+        );
+        answersRepository = new InMemoryAnswersRepository(
+            new InMemoryAnswerAttachmentsRepository(),
+        );
         notificationsRepository = new InMemoryNotificationsRepository();
         sendNotification = new SendNotificationUseCase(notificationsRepository);
 
         sendNotificationSpy = vi.spyOn(sendNotification, "handle");
 
-        new OnQuestionBestAnswerChosen(answersRepository,sendNotification);
+        new OnQuestionBestAnswerChosen(answersRepository, sendNotification);
     });
 
     it("should send a notification when an question has best answer", async () => {
-        const question =  makeQuestion();
+        const question = makeQuestion();
         const answer = makeAnswer({
             questionId: question.id,
         });
@@ -42,10 +56,9 @@ describe("On Question Best Answer Chosen", () => {
         question.bestAnswerId = answer.id;
 
         questionsRepository.save(question);
-        
+
         await waitFor(() => {
             expect(sendNotificationSpy).toHaveBeenCalled();
         });
-
     });
 });

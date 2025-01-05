@@ -2,7 +2,7 @@ import { AggregateRoot } from "../entities/aggregate-root";
 import { UniqueEntityId } from "../entities/value-objects/unique-entity-id";
 import { DomainEvent } from "./domain-event";
 
-type DomainEventCallback = (event: unknown) => void
+type DomainEventCallback = (event: unknown) => void;
 
 export class DomainEvents {
     private static handlersMap: Record<string, DomainEventCallback[]> = {};
@@ -17,13 +17,17 @@ export class DomainEvents {
     }
 
     private static dispatchAggregateEvents(aggregate: AggregateRoot<unknown>) {
-        aggregate.domainEvents.forEach((event: DomainEvent) => this.dispatch(event));
+        aggregate.domainEvents.forEach((event: DomainEvent) =>
+            this.dispatch(event),
+        );
     }
 
     private static removeAggregateFromMarkedDispatchList(
         aggregate: AggregateRoot<unknown>,
     ) {
-        const index = this.markedAggregates.findIndex((a) => a.equals(aggregate));
+        const index = this.markedAggregates.findIndex((a) =>
+            a.equals(aggregate),
+        );
 
         this.markedAggregates.splice(index, 1);
     }
@@ -31,7 +35,9 @@ export class DomainEvents {
     private static findMarkedAggregateByID(
         id: UniqueEntityId,
     ): AggregateRoot<unknown> | undefined {
-        return this.markedAggregates.find((aggregate) => aggregate.id.equals(id));
+        return this.markedAggregates.find((aggregate) =>
+            aggregate.id.equals(id),
+        );
     }
 
     public static dispatchEventsForAggregate(id: UniqueEntityId) {

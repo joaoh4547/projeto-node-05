@@ -4,7 +4,7 @@ import { DomainEvent } from "./domain-event";
 import { DomainEvents } from "./domain-events";
 class CustomAggregateCreated implements DomainEvent {
     public ocurredAt: Date;
-    private aggregate: CustomAggregate; 
+    private aggregate: CustomAggregate;
 
     constructor(aggregate: CustomAggregate) {
         this.aggregate = aggregate;
@@ -26,21 +26,17 @@ class CustomAggregate extends AggregateRoot<null> {
     }
 }
 
-
-describe("Domain Events", () =>{
-
-    it("should be to dispatch and listen event",() =>{
+describe("Domain Events", () => {
+    it("should be to dispatch and listen event", () => {
         const spy = vi.fn();
 
         DomainEvents.register(spy, CustomAggregateCreated.name);
-  
+
         const aggregate = CustomAggregate.create();
-  
+
         expect(aggregate.domainEvents).toHaveLength(1);
         DomainEvents.dispatchEventsForAggregate(aggregate.id);
         expect(spy).toHaveBeenCalled();
         expect(aggregate.domainEvents).toHaveLength(0);
-
     });
-
 });

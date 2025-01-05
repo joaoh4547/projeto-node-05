@@ -1,4 +1,3 @@
-
 import { Either, right } from "@/core/either";
 import { UniqueEntityId } from "@/core/entities/value-objects/unique-entity-id";
 import { Question } from "../../enterprise/entities/question";
@@ -7,23 +6,34 @@ import { QuestionAttachmentList } from "../../enterprise/entities/question-attac
 import { QuestionsRepository } from "../repositories/questions-repository";
 
 export interface CreateQuestionUseCaseInputParams {
-  authorId: string;
-  title: string;
-  content: string;
-  attachmentsIds: string[];
+    authorId: string;
+    title: string;
+    content: string;
+    attachmentsIds: string[];
 }
 
-export type CreateQuestionUseCaseResult = Either<null, {
-  question: Question
-}>
+export type CreateQuestionUseCaseResult = Either<
+    null,
+    {
+        question: Question;
+    }
+>;
 
 export class CreateQuestionUseCase {
+    constructor(private questionsRepository: QuestionsRepository) {}
 
-    constructor(private questionsRepository: QuestionsRepository) { }
-
-    async handle({ authorId, content, title,attachmentsIds }: CreateQuestionUseCaseInputParams): Promise<CreateQuestionUseCaseResult> {
-        const question = Question.create({ authorId: new UniqueEntityId(authorId), content, title });
-        const questionAttachments = attachmentsIds.map(attachmentsId =>{
+    async handle({
+        authorId,
+        content,
+        title,
+        attachmentsIds,
+    }: CreateQuestionUseCaseInputParams): Promise<CreateQuestionUseCaseResult> {
+        const question = Question.create({
+            authorId: new UniqueEntityId(authorId),
+            content,
+            title,
+        });
+        const questionAttachments = attachmentsIds.map((attachmentsId) => {
             return QuestionAttachment.create({
                 attachmentId: new UniqueEntityId(attachmentsId),
                 questionId: question.id,

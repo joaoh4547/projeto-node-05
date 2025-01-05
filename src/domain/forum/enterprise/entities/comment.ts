@@ -2,14 +2,13 @@ import { Entity } from "@/core/entities/entity";
 import { UniqueEntityId } from "@/core/entities/value-objects/unique-entity-id";
 
 export interface CommentProps {
-    authorId: UniqueEntityId,
-    content: string,
-    createdAt: Date,
-    updatedAt?: Date
+    authorId: UniqueEntityId;
+    content: string;
+    createdAt: Date;
+    updatedAt?: Date;
 }
 
 export abstract class Comment<T extends CommentProps> extends Entity<T> {
-
     get content() {
         return this.props.content;
     }
@@ -23,7 +22,6 @@ export abstract class Comment<T extends CommentProps> extends Entity<T> {
         return this.props.authorId;
     }
 
-
     get createdAt() {
         return this.props.createdAt;
     }
@@ -35,5 +33,4 @@ export abstract class Comment<T extends CommentProps> extends Entity<T> {
     private touch() {
         this.props.updatedAt = new Date();
     }
-
 }

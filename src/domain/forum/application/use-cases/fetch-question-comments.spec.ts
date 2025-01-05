@@ -17,23 +17,19 @@ describe("Fetch Questions Comments Use Case", () => {
         await commentsRepository.create(makeQuestionComment());
         await commentsRepository.create(makeQuestionComment());
 
-        const result = await sut.handle({questionId: "1", page: 1});
+        const result = await sut.handle({ questionId: "1", page: 1 });
 
         expect(result.isRight()).toBe(true);
         expect(result.value?.comments).toHaveLength(4);
-
     });
 
-
     it("should be able to fetch paginated questions comments", async () => {
-        for(let i = 0; i < 22; i++){
+        for (let i = 0; i < 22; i++) {
             await commentsRepository.create(makeQuestionComment());
         }
-        const result = await sut.handle({questionId: "1", page: 2});
+        const result = await sut.handle({ questionId: "1", page: 2 });
 
         expect(result.isRight()).toBe(true);
         expect(result.value?.comments).toHaveLength(2);
     });
-
-
 });

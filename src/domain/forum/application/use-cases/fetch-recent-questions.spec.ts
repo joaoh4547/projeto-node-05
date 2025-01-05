@@ -8,22 +8,30 @@ let sut: FetchRecentQuestionsUseCase;
 
 describe("Fetch Recent Questions Use Case", () => {
     beforeEach(() => {
-        questionsRepository = new InMemoryQuestionsRepository(new InMemoryQuestionAttachmentsRepository());
+        questionsRepository = new InMemoryQuestionsRepository(
+            new InMemoryQuestionAttachmentsRepository(),
+        );
         sut = new FetchRecentQuestionsUseCase(questionsRepository);
     });
 
     it("should be able to fetch recent questions", async () => {
-        await questionsRepository.create(makeQuestion({
-            createdAt: new Date(2022, 0, 20)
-        }));
+        await questionsRepository.create(
+            makeQuestion({
+                createdAt: new Date(2022, 0, 20),
+            }),
+        );
 
-        await questionsRepository.create(makeQuestion({
-            createdAt: new Date(2022, 0, 18)
-        }));
+        await questionsRepository.create(
+            makeQuestion({
+                createdAt: new Date(2022, 0, 18),
+            }),
+        );
 
-        await questionsRepository.create(makeQuestion({
-            createdAt: new Date(2022, 0, 23)
-        }));
+        await questionsRepository.create(
+            makeQuestion({
+                createdAt: new Date(2022, 0, 23),
+            }),
+        );
 
         const result = await sut.handle({ page: 1 });
 
@@ -37,20 +45,14 @@ describe("Fetch Recent Questions Use Case", () => {
         ]);
     });
 
-
     it("should be able to fetch paginated recent questions", async () => {
-        for(let i = 1; i <= 22; i++) {
+        for (let i = 1; i <= 22; i++) {
             await questionsRepository.create(makeQuestion());
         }
-        
 
         const result = await sut.handle({ page: 2 });
 
         expect(result.isRight()).toBe(true);
         expect(result.value?.questions).toHaveLength(2);
-
-    
     });
-
-    
 });
