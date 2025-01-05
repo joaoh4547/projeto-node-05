@@ -6,10 +6,11 @@ import { envSchema } from "./env";
 import { AuthModule } from "./auth/auth.module";
 import { AuthenticateController } from "./controllers/authenticate.controller";
 import { CreateQuestionController } from "./controllers/create-question.controller";
+import { FetchRecentQuestionsController } from "./controllers/fetch-recent-questions.controller";
 
 @Module({
-    controllers: [CreateAccountController,AuthenticateController,CreateQuestionController],
-    providers: [ PrismaService],
+    controllers: [CreateAccountController, AuthenticateController, CreateQuestionController, FetchRecentQuestionsController],
+    providers: [PrismaService],
     imports: [ConfigModule.forRoot({
         validate: obj => envSchema.parse(obj),
         isGlobal: true,

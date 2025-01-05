@@ -33,3 +33,24 @@ Authorization: Bearer {{authToken}}
     "title": "Question test",
     "content": "Question Content"
 }
+
+
+###
+
+# @name create_question_2
+POST {{baseUrl}}/questions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "title": "Question test 2",
+    "content": "Question Content 2"
+}
+
+
+###
+
+# @name fetch_recent_questions
+GET {{baseUrl}}/questions?page=1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
