@@ -11,7 +11,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
 
     async create(question: Question) {
         const data = PrismaQuestionMapper.toPersistence(question);
-        this.prismaService.question.create({ data });
+        await this.prismaService.question.create({ data });
     }
 
     async findBySlug(slug: string) {
