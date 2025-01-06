@@ -47,6 +47,19 @@ Authorization: Bearer {{authToken}}
     "content": "Question Content 2"
 }
 
+###
+
+# @name create_question_3
+POST {{baseUrl}}/questions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "title": "Question test 3",
+    "content": "Question Content 3"
+}
+
+
 
 ###
 
