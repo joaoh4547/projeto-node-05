@@ -6,6 +6,7 @@ import { CreateAccountController } from "./controllers/create-account.controller
 import { DatabaseModule } from "../database/prisma/database.module";
 import { CreateQuestionUseCase } from "@/domain/forum/application/use-cases/create-question";
 import { FetchRecentQuestionsUseCase } from "@/domain/forum/application/use-cases/fetch-recent-questions";
+import { CryptographModule } from "../cryptograph/cryptograph.module";
 
 @Module({
     controllers: [
@@ -14,7 +15,7 @@ import { FetchRecentQuestionsUseCase } from "@/domain/forum/application/use-case
         CreateQuestionController,
         FetchRecentQuestionsController,
     ],
-    imports: [DatabaseModule],
+    imports: [DatabaseModule, CryptographModule],
     providers: [CreateQuestionUseCase, FetchRecentQuestionsUseCase],
 })
 export class HttpModule {}

@@ -1,15 +1,15 @@
 import {
     Body,
-    Controller,
-    Post,
+    Controller, Post,
     UnauthorizedException,
-    UsePipes,
+    UsePipes
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { compare } from "bcryptjs";
 import { ZodValidationPipe } from "@/infra/http/pipes/zod-validation.pipe";
 import { PrismaService } from "@/infra/database/prisma/prisma.service";
 import { z } from "zod";
+import { Encrypter } from "@/domain/forum/application/cryptography/encrypter";
 
 const authenticateBodySchema = z.object({
     email: z.string().email(),
@@ -23,6 +23,7 @@ export class AuthenticateController {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly jwt: JwtService,
+        private readonly encrypter: Encrypter,
     ) {}
 
     @Post()
