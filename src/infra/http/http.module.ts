@@ -7,6 +7,8 @@ import { DatabaseModule } from "../database/prisma/database.module";
 import { CreateQuestionUseCase } from "@/domain/forum/application/use-cases/create-question";
 import { FetchRecentQuestionsUseCase } from "@/domain/forum/application/use-cases/fetch-recent-questions";
 import { CryptographModule } from "../cryptograph/cryptograph.module";
+import { AuthenticateStudentUseCase } from "@/domain/forum/application/use-cases/authenticate-student";
+import { RegisterStudentUseCase } from "@/domain/forum/application/use-cases/register-student";
 
 @Module({
     controllers: [
@@ -16,6 +18,11 @@ import { CryptographModule } from "../cryptograph/cryptograph.module";
         FetchRecentQuestionsController,
     ],
     imports: [DatabaseModule, CryptographModule],
-    providers: [CreateQuestionUseCase, FetchRecentQuestionsUseCase],
+    providers: [
+        CreateQuestionUseCase,
+        FetchRecentQuestionsUseCase,
+        AuthenticateStudentUseCase,
+        RegisterStudentUseCase,
+    ],
 })
 export class HttpModule {}
