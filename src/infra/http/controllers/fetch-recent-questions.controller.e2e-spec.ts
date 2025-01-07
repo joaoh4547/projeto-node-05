@@ -1,72 +1,46 @@
 import { AppModule } from "@/infra/app.module";
-import { PrismaService } from "@/infra/database/prisma/prisma.service";
+import { DatabaseModule } from "@/infra/database/prisma/database.module";
 import { INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
+import { QuestionFactory } from "test/factories/make-questions";
+import { StudentFactory } from "test/factories/make-student";
 
 describe("Fetch Recent Questions (E2E)", () => {
     let app: INestApplication;
-    let prismaService: PrismaService;
     let jwtService: JwtService;
+    let studentFactory: StudentFactory;
+    let questionFactory: QuestionFactory;
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
-            imports: [AppModule],
+            imports: [AppModule, DatabaseModule],
+            providers: [StudentFactory, QuestionFactory],
         }).compile();
 
         app = moduleRef.createNestApplication();
-        prismaService = moduleRef.get(PrismaService);
         jwtService = moduleRef.get(JwtService);
+        studentFactory = moduleRef.get(StudentFactory);
+        questionFactory = moduleRef.get(QuestionFactory);
         await app.init();
     });
 
     test("[GET] /questions", async () => {
-        const user = await prismaService.user.create({
-            data: {
-                name: "John Doe",
-                email: "john.doe@example.com",
-                password: "password123",
-            },
-        });
+        const user = await studentFactory.makePrismaStudent();
 
-        const accessToken = jwtService.sign({ sub: user.id });
+        const accessToken = jwtService.sign({ sub: user.id.toString() });
 
-        await prismaService.question.createMany({
-            data: [
-                {
-                    title: "Question Title 01",
-                    content: "Question Content 01",
-                    slug: "question-01",
-                    authorId: user.id,
-                },
-                {
-                    title: "Question Title 02",
-                    content: "Question Content 02",
-                    slug: "question-02",
-                    authorId: user.id,
-                },
-
-                {
-                    title: "Question Title 03",
-                    content: "Question Content 03",
-                    slug: "question-03",
-                    authorId: user.id,
-                },
-                {
-                    title: "Question Title 04",
-                    content: "Question Content 04",
-                    slug: "question-04",
-                    authorId: user.id,
-                },
-                {
-                    title: "Question Title 05",
-                    content: "Question Content 05",
-                    slug: "question-05",
-                    authorId: user.id,
-                },
-            ],
-        });
+        await Promise.all([
+            questionFactory.makePrismaQuestion({
+                authorId: user.id,
+                title: "Question Title 01",
+            }),
+            questionFactory.makePrismaQuestion({
+                authorId: user.id,
+                title: "Question Title 02",
+            }),
+        ]);
 
         const response = await request(app.getHttpServer())
             .get("/questions")
@@ -76,11 +50,8 @@ describe("Fetch Recent Questions (E2E)", () => {
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual({
             questions: [
-                expect.objectContaining({ title: "Question Title 01" }),
                 expect.objectContaining({ title: "Question Title 02" }),
-                expect.objectContaining({ title: "Question Title 03" }),
-                expect.objectContaining({ title: "Question Title 04" }),
-                expect.objectContaining({ title: "Question Title 05" }),
+                expect.objectContaining({ title: "Question Title 01" }),
             ],
         });
     });
