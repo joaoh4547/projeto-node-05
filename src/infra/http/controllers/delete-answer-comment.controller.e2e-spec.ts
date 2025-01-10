@@ -5,15 +5,17 @@ import { INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
-import { QuestionCommentFactory } from "test/factories/make-question-comment";
+import { AnswerCommentFactory } from "test/factories/make-answer-comment";
+import { AnswerFactory } from "test/factories/make-answers";
 import { QuestionFactory } from "test/factories/make-questions";
 import { StudentFactory } from "test/factories/make-student";
 
-describe("Delete Question Comment (E2E)", () => {
+describe("Delete Answer Comment (E2E)", () => {
     let app: INestApplication;
     let studentFactory: StudentFactory;
     let questionFactory: QuestionFactory;
-    let questionCommentFactory: QuestionCommentFactory;
+    let answerFactory: AnswerFactory;
+    let answerCommentFactory: AnswerCommentFactory;
     let prismaService: PrismaService;
     let jwtService: JwtService;
 
@@ -23,7 +25,8 @@ describe("Delete Question Comment (E2E)", () => {
             providers: [
                 StudentFactory,
                 QuestionFactory,
-                QuestionCommentFactory,
+                AnswerFactory,
+                AnswerCommentFactory,
             ],
         }).compile();
 
@@ -31,12 +34,13 @@ describe("Delete Question Comment (E2E)", () => {
         prismaService = moduleRef.get(PrismaService);
         studentFactory = moduleRef.get(StudentFactory);
         questionFactory = moduleRef.get(QuestionFactory);
-        questionCommentFactory = moduleRef.get(QuestionCommentFactory);
+        answerFactory = moduleRef.get(AnswerFactory);
+        answerCommentFactory = moduleRef.get(AnswerCommentFactory);
         jwtService = moduleRef.get(JwtService);
         await app.init();
     });
 
-    test("[DELETE] /questions/comments/:id", async () => {
+    test("[DELETE] /answers/comments/:id", async () => {
         const user = await studentFactory.makePrismaStudent();
 
         const accessToken = jwtService.sign({ sub: user.id.toString() });
@@ -45,15 +49,20 @@ describe("Delete Question Comment (E2E)", () => {
             authorId: user.id,
         });
 
-        const comment = await questionCommentFactory.makePrismaQuestionComment({
+        const answer = await answerFactory.makePrismaAnswer({
             questionId: question.id,
+            authorId: user.id,
+        });
+
+        const comment = await answerCommentFactory.makePrismaAnswerComment({
+            answerId: answer.id,
             authorId: user.id,
         });
 
         const commentId = comment.id.toString();
 
         const response = await request(app.getHttpServer())
-            .delete(`/questions/comments/${commentId}`)
+            .delete(`/answers/comments/${commentId}`)
             .set("Authorization", `Bearer ${accessToken}`)
             .send();
 
