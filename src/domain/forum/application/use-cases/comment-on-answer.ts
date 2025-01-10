@@ -4,6 +4,7 @@ import { ResourceNotFoundError } from "@/core/errors/resource-not-found-error";
 import { AnswerComment } from "../../enterprise/entities/answer-comment";
 import { AnswersCommentsRepository } from "../repositories/answers-comments-repository";
 import { AnswersRepository } from "../repositories/answers-repository";
+import { Injectable } from "@nestjs/common";
 
 export interface CommentOnAnswerUseCaseInputParams {
     authorId: string;
@@ -18,6 +19,7 @@ export type CommentOnAnswerUseCaseResult = Either<
     }
 >;
 
+@Injectable()
 export class CommentOnAnswerUseCase {
     constructor(
         private answersRepository: AnswersRepository,
