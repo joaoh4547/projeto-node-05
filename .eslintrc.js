@@ -30,6 +30,7 @@ module.exports = {
         "no-useless-constructor": "off",
         "no-use-before-define": "off",
         "no-new": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
     },
     settings: {
         "import/parsers": {
