@@ -6,6 +6,16 @@ export class InMemoryQuestionAttachmentsRepository
 {
     attachments: QuestionAttachment[] = [];
 
+    async createMany(attachments: QuestionAttachment[]) {
+        this.attachments.push(...attachments);
+    }
+
+    async deleteMany(attachments: QuestionAttachment[]) {
+        this.attachments = this.attachments.filter((item) => {
+            return !attachments.some((attachment) => attachment.equals(item));
+        });
+    }
+
     async findManyByQuestionId(questionId: string) {
         return this.attachments.filter(
             (attachment) => attachment.questionId.toString() === questionId,
