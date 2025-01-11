@@ -4,14 +4,21 @@ import { Question } from "@/domain/forum/enterprise/entities/question";
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { PrismaQuestionMapper } from "../mappers/prisma-question-mapper";
+import { QuestionAttachmentsRepository } from "@/domain/forum/application/repositories/question-attachments-repository";
 
 @Injectable()
 export class PrismaQuestionsRepository implements QuestionsRepository {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly questionAttachmentsRepository: QuestionAttachmentsRepository,
+    ) {}
 
     async create(question: Question) {
         const data = PrismaQuestionMapper.toPersistence(question);
         await this.prismaService.question.create({ data });
+        await this.questionAttachmentsRepository.createMany(
+            question.attachments.getItems(),
+        );
     }
 
     async findBySlug(slug: string) {
@@ -45,10 +52,21 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
 
     async save(question: Question) {
         const data = PrismaQuestionMapper.toPersistence(question);
-        await this.prismaService.question.update({
-            where: { id: question.id.toString() },
-            data,
-        });
+
+        await Promise.all([
+            this.prismaService.question.update({
+                where: { id: question.id.toString() },
+                data,
+            }),
+
+            this.questionAttachmentsRepository.createMany(
+                question.attachments.getNewItems(),
+            ),
+
+            this.questionAttachmentsRepository.deleteMany(
+                question.attachments.getRemovedItems(),
+            ),
+        ]);
     }
 
     async findManyRecent({ page }: PaginationParams) {

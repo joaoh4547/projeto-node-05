@@ -2,6 +2,7 @@ import { QuestionAttachmentsRepository } from "@/domain/forum/application/reposi
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { PrismaQuestionAttachmentMapper } from "../mappers/prisma-question-attachment-mapper";
+import { QuestionAttachment } from "@/domain/forum/enterprise/entities/question-attachment";
 
 @Injectable()
 export class PrismaQuestionAttachmentRepository
@@ -24,5 +25,30 @@ export class PrismaQuestionAttachmentRepository
                 questionId,
             },
         });
+    }
+
+    async createMany(attachments: QuestionAttachment[]) {
+        if (!(attachments.length === 0)) {
+            const data =
+                PrismaQuestionAttachmentMapper.toPersistenceOfUpdateMany(
+                    attachments,
+                );
+            await this.prismaService.attachment.updateMany(data);
+        }
+    }
+
+    async deleteMany(attachments: QuestionAttachment[]) {
+        if (!(attachments.length === 0)) {
+            const attachmentIds = attachments.map((attachment) =>
+                attachment.id.toString(),
+            );
+            await this.prismaService.attachment.deleteMany({
+                where: {
+                    id: {
+                        in: attachmentIds,
+                    },
+                },
+            });
+        }
     }
 }
