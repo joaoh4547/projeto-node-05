@@ -16,7 +16,7 @@ describe("Answer Use Case", () => {
 
     it("should be able to create an answer", async () => {
         const result = await sut.handle({
-            instructorId: "1",
+            authorId: "1",
             questionId: "1",
             content: "Content",
             attachmentsIds: ["1", "2"],
