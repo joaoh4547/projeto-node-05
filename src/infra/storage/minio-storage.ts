@@ -18,6 +18,7 @@ export class MinioStorage implements Uploader {
                 accessKeyId: envService.get("AWS_ACCESS_KEY_ID"),
                 secretAccessKey: envService.get("AWS_SECRET_ACCESS_KEY"),
             },
+            region: "auto",
         });
     }
 
