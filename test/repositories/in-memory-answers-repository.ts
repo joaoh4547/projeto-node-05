@@ -7,32 +7,50 @@ import { InMemoryAnswerAttachmentsRepository } from "./in-memory-answer-attachme
 export class InMemoryAnswersRepository implements AnswersRepository {
     answers: Answer[] = [];
 
-    constructor(private answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository){}
+    constructor(
+        private answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository,
+    ) {}
 
     async create(answer: Answer) {
         this.answers.push(answer);
+        await this.answerAttachmentsRepository.createMany(
+            answer.attachments.getItems(),
+        );
         DomainEvents.dispatchEventsForAggregate(answer.id);
     }
 
     async delete(answer: Answer) {
-        this.answers = this.answers.filter(a => a.id !== answer.id);
-        await this.answerAttachmentsRepository.deleteManyByAnswerId(answer.id.toString());
+        this.answers = this.answers.filter((a) => a.id !== answer.id);
+        await this.answerAttachmentsRepository.deleteManyByAnswerId(
+            answer.id.toString(),
+        );
     }
 
     async findById(id: string) {
-        return this.answers.find(answer => answer.id.toString() === id) || null;
+        return (
+            this.answers.find((answer) => answer.id.toString() === id) || null
+        );
     }
 
     async save(answer: Answer) {
-        const answerIndex = this.answers.findIndex(a => a.id === answer.id);
+        const answerIndex = this.answers.findIndex((a) => a.id === answer.id);
         this.answers[answerIndex] = answer;
+
+        await this.answerAttachmentsRepository.createMany(
+            answer.attachments.getNewItems(),
+        );
+
+        await this.answerAttachmentsRepository.deleteMany(
+            answer.attachments.getRemovedItems(),
+        );
+
         DomainEvents.dispatchEventsForAggregate(answer.id);
     }
 
     async findManyByQuestionId(questionId: string, { page }: PaginationParams) {
         const PAGE_SIZE = 20;
         return this.answers
-            .filter(answer => answer.questionId.toString() === questionId)
+            .filter((answer) => answer.questionId.toString() === questionId)
             .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     }
 }
