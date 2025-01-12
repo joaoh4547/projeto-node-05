@@ -61,7 +61,15 @@ describe("Prisma Questions Repository (E2E)", () => {
 
         const cached = await cacheRepository.get(`question:${slug}:details`);
 
-        expect(cached).toEqual(JSON.stringify(questionDetails));
+        if (!cached) {
+            throw new Error();
+        }
+
+        expect(JSON.parse(cached)).toEqual(
+            expect.objectContaining({
+                id: questionDetails?.questionId.toString(),
+            }),
+        );
     });
 
     it("should return cached details on subsequent calls", async () => {
@@ -82,14 +90,25 @@ describe("Prisma Questions Repository (E2E)", () => {
 
         const cacheKey = `question:${slug}:details`;
 
-        await cacheRepository.set(cacheKey, JSON.stringify({ empty: true }));
+        let cached = await cacheRepository.get(cacheKey);
+        expect(cached).toBeNull();
+        await questionsRepository.findBySlugWithDetails(slug);
+
+        cached = await cacheRepository.get(cacheKey);
+        expect(cached).not.toBeNull();
+
+        if (!cached) {
+            throw new Error();
+        }
 
         const questionDetails =
             await questionsRepository.findBySlugWithDetails(slug);
 
-        expect(questionDetails).toEqual({
-            empty: true,
-        });
+        expect(JSON.parse(cached)).toEqual(
+            expect.objectContaining({
+                id: questionDetails?.questionId.toString(),
+            }),
+        );
     });
 
     it("should reset question details cache when saving the question", async () => {
