@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { PrismaQuestionMapper } from "../mappers/prisma-question-mapper";
 import { QuestionAttachmentsRepository } from "@/domain/forum/application/repositories/question-attachments-repository";
+import { PrismaQuestionDetailsMapper } from "../mappers/prisma-question-details.mapper";
 
 @Injectable()
 export class PrismaQuestionsRepository implements QuestionsRepository {
@@ -29,6 +30,20 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
             return null;
         }
         return PrismaQuestionMapper.toDomain(question);
+    }
+
+    async findBySlugWithDetails(slug: string) {
+        const question = await this.prismaService.question.findUnique({
+            where: { slug },
+            include: {
+                attachments: true,
+                author: true,
+            },
+        });
+        if (!question) {
+            return null;
+        }
+        return PrismaQuestionDetailsMapper.toDomain(question);
     }
 
     async findById(id: string) {

@@ -15,6 +15,8 @@ import {
 } from "../use-cases/send-notification";
 import { OnQuestionBestAnswerChosen } from "./on-question-best-answer-chosen";
 import { MockInstance } from "vitest";
+import { InMemoryAttachmentsRepository } from "test/repositories/in-memory-attachments-repository";
+import { InMemoryStudentRepository } from "test/repositories/in-memory-students-repository";
 
 let questionsRepository: QuestionsRepository;
 let answersRepository: InMemoryAnswersRepository;
@@ -33,6 +35,8 @@ describe("On Question Best Answer Chosen", () => {
     beforeEach(() => {
         questionsRepository = new InMemoryQuestionsRepository(
             new InMemoryQuestionAttachmentsRepository(),
+            new InMemoryAttachmentsRepository(),
+            new InMemoryStudentRepository(),
         );
         answersRepository = new InMemoryAnswersRepository(
             new InMemoryAnswerAttachmentsRepository(),

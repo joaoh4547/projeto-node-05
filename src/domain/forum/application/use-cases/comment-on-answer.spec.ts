@@ -3,6 +3,7 @@ import { InMemoryAnswerAttachmentsRepository } from "test/repositories/in-memory
 import { InMemoryAnswersCommentsRepository } from "test/repositories/in-memory-answers-comments-repository";
 import { InMemoryAnswersRepository } from "test/repositories/in-memory-answers-repository";
 import { CommentOnAnswerUseCase } from "./comment-on-answer";
+import { InMemoryStudentRepository } from "test/repositories/in-memory-students-repository";
 
 let answersRepository: InMemoryAnswersRepository;
 let answerCommentsRepository: InMemoryAnswersCommentsRepository;
@@ -13,7 +14,9 @@ describe("Comment on Answer Use Case", () => {
         answersRepository = new InMemoryAnswersRepository(
             new InMemoryAnswerAttachmentsRepository(),
         );
-        answerCommentsRepository = new InMemoryAnswersCommentsRepository();
+        answerCommentsRepository = new InMemoryAnswersCommentsRepository(
+            new InMemoryStudentRepository(),
+        );
         sut = new CommentOnAnswerUseCase(
             answersRepository,
             answerCommentsRepository,
