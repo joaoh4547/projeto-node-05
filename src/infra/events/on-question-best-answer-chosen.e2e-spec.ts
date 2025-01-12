@@ -1,64 +1,69 @@
 import { DomainEvents } from "@/core/events/domain-events";
 import { AppModule } from "@/infra/app.module";
+import { DatabaseModule } from "@/infra/database/prisma/database.module";
 import { PrismaService } from "@/infra/database/prisma/prisma.service";
 import { INestApplication } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
+import { AnswerFactory } from "test/factories/make-answers";
 import { QuestionFactory } from "test/factories/make-questions";
-
 import { StudentFactory } from "test/factories/make-student";
 import { waitFor } from "test/utils/wait-for";
-import { DatabaseModule } from "../database/prisma/database.module";
 
-describe("On answer created (E2E)", () => {
+describe("On Question Best Answer chosen (E2E)", () => {
     let app: INestApplication;
-    let prisma: PrismaService;
     let studentFactory: StudentFactory;
     let questionFactory: QuestionFactory;
-    let jwt: JwtService;
+    let prismaService: PrismaService;
+    let answerFactory: AnswerFactory;
+    let jwtService: JwtService;
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [AppModule, DatabaseModule],
-            providers: [StudentFactory, QuestionFactory],
+            providers: [StudentFactory, QuestionFactory, AnswerFactory],
         }).compile();
 
         app = moduleRef.createNestApplication();
-
-        prisma = moduleRef.get(PrismaService);
+        prismaService = moduleRef.get(PrismaService);
         studentFactory = moduleRef.get(StudentFactory);
         questionFactory = moduleRef.get(QuestionFactory);
-        jwt = moduleRef.get(JwtService);
+        answerFactory = moduleRef.get(AnswerFactory);
+        jwtService = moduleRef.get(JwtService);
+
         DomainEvents.shouldRun = true;
         await app.init();
     });
 
-    it("should send a notification when answer is created", async () => {
+    it("should send notification when question best answer is chosen", async () => {
         const user = await studentFactory.makePrismaStudent();
 
-        const accessToken = jwt.sign({ sub: user.id.toString() });
+        const accessToken = jwtService.sign({ sub: user.id.toString() });
 
         const question = await questionFactory.makePrismaQuestion({
             authorId: user.id,
         });
 
-        const questionId = question.id.toString();
+        const answer = await answerFactory.makePrismaAnswer({
+            questionId: question.id,
+            authorId: user.id,
+        });
+
+        const answerId = answer.id.toString();
 
         await request(app.getHttpServer())
-            .post(`/questions/${questionId}/answers`)
+            .patch(`/answers/${answerId}/choose-as-best`)
             .set("Authorization", `Bearer ${accessToken}`)
-            .send({
-                content: "New answer",
-                attachments: [],
-            });
+            .send();
 
         await waitFor(async () => {
-            const notificationOnDatabase = await prisma.notification.findFirst({
-                where: {
-                    recipientId: user.id.toString(),
-                },
-            });
+            const notificationOnDatabase =
+                await prismaService.notification.findFirst({
+                    where: {
+                        recipientId: user.id.toString(),
+                    },
+                });
 
             expect(notificationOnDatabase).not.toBeNull();
         });

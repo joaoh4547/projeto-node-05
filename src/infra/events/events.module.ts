@@ -7,9 +7,9 @@ import { DatabaseModule } from "../database/prisma/database.module";
 @Module({
     imports: [DatabaseModule],
     providers: [
+        SendNotificationUseCase,
         OnAnswerCreated,
         OnQuestionBestAnswerChosen,
-        SendNotificationUseCase,
     ],
 })
 export class EventsModule {}
