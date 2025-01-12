@@ -3,17 +3,31 @@ import { InMemoryQuestionAttachmentsRepository } from "test/repositories/in-memo
 import { InMemoryQuestionsCommentsRepository } from "test/repositories/in-memory-question-comments-repository";
 import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questions-repository";
 import { CommentOnQuestionUseCase } from "./comment-on-question";
+import { InMemoryAttachmentsRepository } from "test/repositories/in-memory-attachments-repository";
+import { InMemoryStudentRepository } from "test/repositories/in-memory-students-repository";
 
 let questionsRepository: InMemoryQuestionsRepository;
 let questionCommentsRepository: InMemoryQuestionsCommentsRepository;
+let questionAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
+let attachmentsRepository: InMemoryAttachmentsRepository;
+let studentRepository: InMemoryStudentRepository;
 let sut: CommentOnQuestionUseCase;
 
 describe("Comment on question Use Case", () => {
     beforeEach(() => {
+        questionAttachmentsRepository =
+            new InMemoryQuestionAttachmentsRepository();
+        attachmentsRepository = new InMemoryAttachmentsRepository();
+        studentRepository = new InMemoryStudentRepository();
         questionsRepository = new InMemoryQuestionsRepository(
-            new InMemoryQuestionAttachmentsRepository(),
+            questionAttachmentsRepository,
+            attachmentsRepository,
+            studentRepository,
         );
-        questionCommentsRepository = new InMemoryQuestionsCommentsRepository();
+
+        questionCommentsRepository = new InMemoryQuestionsCommentsRepository(
+            studentRepository,
+        );
         sut = new CommentOnQuestionUseCase(
             questionsRepository,
             questionCommentsRepository,

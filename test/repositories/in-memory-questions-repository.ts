@@ -33,40 +33,46 @@ export class InMemoryQuestionsRepository implements QuestionsRepository {
 
     async findBySlugWithDetails(slug: string) {
         const question = this.questions.find(
-            (question) => question.slug.value === slug,
+            (item) => item.slug.value === slug,
         );
 
         if (!question) {
             return null;
         }
 
-        const author = this.studentsRepository.students.find((student) =>
-            student.id.equals(question.authorId),
-        );
+        const author = this.studentsRepository.students.find((student) => {
+            return student.id.equals(question.authorId);
+        });
+
         if (!author) {
             throw new Error(
-                `Author ${question.authorId.toString()} not found for question ${question.id.toString()}`,
+                `Author with ID "${question.authorId.toString()}" does not exist.`,
             );
         }
 
         const questionAttachments =
-            await this.questionAttachmentsRepository.findManyByQuestionId(
-                question.id.toString(),
+            this.questionAttachmentsRepository.attachments.filter(
+                (questionAttachment) => {
+                    return questionAttachment.questionId.equals(question.id);
+                },
             );
 
-        const attachments = questionAttachments.map((attachment) => {
-            const questionAttachment =
-                this.attachmentsRepository.attachments.find((a) =>
-                    a.id.equals(attachment.id),
-                );
+        const attachments = questionAttachments.map((questionAttachment) => {
+            const attachment = this.attachmentsRepository.attachments.find(
+                (attachment) => {
+                    return attachment.id.equals(
+                        questionAttachment.attachmentId,
+                    );
+                },
+            );
 
-            if (!questionAttachment) {
+            if (!attachment) {
                 throw new Error(
-                    `Attachment ${attachment.id.toString()} not found for question ${question.id.toString()}`,
+                    `Attachment with ID "${questionAttachment.attachmentId.toString()}" does not exist.`,
                 );
             }
 
-            return questionAttachment;
+            return attachment;
         });
 
         return QuestionDetails.create({
